@@ -1,51 +1,76 @@
 # rime-table-decompiler
 
-反編譯 Rime 的 ``xxx.table.bin`` 二進制詞典文件。
+反编译 Rime 的 ``xxx.table.bin`` 二进制词典文件。
 
-## 簡介
+## 简介
 
-本項目 Fork 自 [whjiang/rime_table_bin_decompiler]。
+本项目 Fork 自 [whjiang/rime_table_bin_decompiler]。
 
-相對於原項目，本項目有以下的更改。
+相对于原项目，本项目有以下的更改。
 
-+ 修復在 Linux 系統上的編譯錯誤
-+ 更易讀的 README
++ 修复了在 Linux 系统上的编译错误
++ 更易读的 README
++ 从 Docker 启动
 
-本項目用於簡單的反編譯 Rime 的 ``xxx.table.bin`` 二進制詞典文
-件，以生成 ``xxx.dict.yaml`` 源純文本詞典文件。
+本项目用于简单的反编译 Rime 的 ``xxx.table.bin`` 二进制词典文件，以生成 ``xxx.dict.yaml`` 源纯文本词典文件。
 
-需要注意的是，由於 ``xxx.table.bin`` 二進制詞庫文件沒有元數據
-信息，所以生成的 ``xxx.dict.yaml`` 源純文本詞典文件的文件頭中
-的元數據信息是根據常見的元數據信息填補進去的，所以可能是錯誤
-的，需要用戶自行修正。
-
-## 使用
-
-#### 安装工具鏈
-
-+ GNU toolchain
-+ CMake
-+ Boost
-
-#### 編譯
-
-1. ``cmake .``
-2. ``make``
-
-## 用法
-
-反編譯二進制詞庫並標準輸出。
-
-```Bash
-./rime_table_bin_decompiler xxx.table.bin
-```
-
-反編譯二進制詞庫並輸出到純文本詞庫文件中。
-
-```Bash
-./rime_table_bin_decompiler xxx.table.bin > xxx.dict.yaml
-```
-
-
+需要注意的是，由于 ``xxx.table.bin`` 二进制词库文件没有元数据信息，所以生成的 ``xxx.dict.yaml`` 源纯文本词典文件的文件头中的元数据信息是根据常见的元数据信息填补进去的，所以可能是错误的，需自行修正。
 
 [whjiang/rime_table_bin_decompiler]: https://github.com/whjiang/rime_table_bin_decompiler
+
+## 从 Docker 运行
+
+### 构建镜像
+```Bash
+docker build . -t rime-table-decompiler
+```
+
+也可以直接使用 Docker Hub 中构建好的镜像
+```Bash
+docker pull cubercsl/rime-table-decompiler
+```
+
+### 运行
+
+反编译二进制词库并标准输出。
+
+```Bash
+docker run --rm -v /path/to/xxx.table.bin:/data/xxx.table.bin rime-table-decompiler /data/xxx.table.bin
+```
+
+反编译二进制词库并输出到纯文本词库文件中。
+
+```Bash
+docker run --rm -v /path/to/xxx.table.bin:/data/xxx.table.bin rime-table-decompiler /data/xxx.table.bin > xxx.dict.yaml
+```
+
+**注意将需要反编译的码表 `xxx.table.bin` 挂载进容器。**
+
+## 从源代码编译
+
+### 工具链
+
++ GNU toolchain
++ Boost
++ CMake
+
+### 步骤
+
+1. ``cd rime-table-decompiler/src``
+2. ``mkdir build && cd build``
+3. ``cmake ..``
+4. ``make``
+
+### 运行
+
+反编译二进制词库并标准输出。
+
+```Bash
+./rime-table-decompiler xxx.table.bin
+```
+
+反编译二进制词库并输出到纯文本词库文件中。
+
+```Bash
+./rime-table-decompiler xxx.table.bin > xxx.dict.yaml
+```
