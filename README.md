@@ -10,7 +10,7 @@
 
 + 修复了在 Linux 系统上的编译错误
 + 更易读的 README
-+ 从 Docker 启动
++ 从 Docker 运行
 
 本项目用于简单的反编译 Rime 的 ``xxx.table.bin`` 二进制词典文件，以生成 ``xxx.dict.yaml`` 源纯文本词典文件。
 
@@ -18,59 +18,39 @@
 
 [whjiang/rime_table_bin_decompiler]: https://github.com/whjiang/rime_table_bin_decompiler
 
-## 从 Docker 运行
-
-### 构建镜像
-```Bash
-docker build . -t rime-table-decompiler
-```
-
-也可以直接使用 Docker Hub 中构建好的镜像
-```Bash
-docker pull cubercsl/rime-table-decompiler
-```
-
-### 运行
-
-反编译二进制词库并标准输出。
-
-```Bash
-docker run --rm -v /path/to/xxx.table.bin:/data/xxx.table.bin rime-table-decompiler /data/xxx.table.bin
-```
-
-反编译二进制词库并输出到纯文本词库文件中。
-
-```Bash
-docker run --rm -v /path/to/xxx.table.bin:/data/xxx.table.bin rime-table-decompiler /data/xxx.table.bin > xxx.dict.yaml
-```
-
-**注意将需要反编译的码表 `xxx.table.bin` 挂载进容器。**
-
 ## 从源代码编译
 
 ### 工具链
 
 + GNU toolchain
 + Boost
++ Marisa
 + CMake
+
+**Debian/Ubuntu** 需要安装 `build-essential`, `cmake`, `libboost-filesystem-dev`, `libmarisa-dev`
+
+**Arch** 需要安装 `base-devel`, `boost`, `cmake`, `marisa`
 
 ### 步骤
 
-1. ``cd rime-table-decompiler/src``
-2. ``mkdir build && cd build``
-3. ``cmake ..``
-4. ``make``
+```bash
+cd rime-table-decomplier
+mkdir build && cd build
+cmake ..
+make -j
+# make install
+```
 
 ### 运行
 
 反编译二进制词库并标准输出。
 
 ```Bash
-./rime-table-decompiler xxx.table.bin
+rime_table_bin_decompiler xxx.table.bin
 ```
 
 反编译二进制词库并输出到纯文本词库文件中。
 
 ```Bash
-./rime-table-decompiler xxx.table.bin > xxx.dict.yaml
+rime_table_bin_decompiler xxx.table.bin > xxx.dict.yaml
 ```

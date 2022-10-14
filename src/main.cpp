@@ -1,86 +1,56 @@
 #include <iostream>
-#include <string>
-#include "table.h"
-#include <map>
 #include <iterator>
+#include <map>
+#include <string>
+#include <rime/dict/table.h>
 
-using namespace std;
-
-multimap<string, string> word2codeMap;
-multimap<string, string> code2wordMap;
-set<string> codeSet;
+std::multimap<std::string, std::string> code2wordMap;
+std::set<std::string> codeSet;
 
 void queryCode(rime::Table& table, int i0) {
     rime::TableAccessor v = table.QueryWords(i0);
-    if(!v.exhausted()) {
-        string code = table.GetSyllableById(i0);
+    if (!v.exhausted()) {
+        std::string code = table.GetSyllableById(i0);
         do {
             rime::string str = table.GetEntryText(*v.entry());
             unsigned char c = str[0];
-            if(c < 20) {
+            if (c < 20) {
                 continue;
             }
-            word2codeMap.insert(pair<string, string>(str, code));
-            code2wordMap.insert(pair<string, string>(code, str));
+            code2wordMap.insert(std::pair<std::string, std::string>(code, str));
             codeSet.insert(code);
-        }while(v.Next());
+        } while(v.Next());
     }
-}
-
-void printTable() {
-    string prev = "";
-    bool first = true;
-    for(auto codeIt=codeSet.begin(); codeIt!=codeSet.end(); ++codeIt) {
-        string code = *codeIt;
-        string code2 = code.substr(0,4);
-        if(prev!=code2) {
-            if(first) {
-                first = false;
-            }else {
-                cout << "\n";
-            }
-            cout << code2;
-            prev = code2;
-        }
-        for(auto wordIt=code2wordMap.lower_bound(code); wordIt!=code2wordMap.upper_bound(code); ++wordIt) {
-            string word = wordIt->second;
-            cout << " " << word;
-            //cout << word << "\t" << code << "\n";
-            /*
-            bool first = true;
-            for(auto codeIt2=word2codeMap.lower_bound(word); codeIt2!=word2codeMap.upper_bound(word); ++codeIt2) {
-                string code2 = codeIt2->second;
-                if(first) {
-                    first = false;
-                }else {
-                    cout << " ";
-                }
-                cout << code2;
-            }
-            cout << "\n";
-             */
-        }
-    }
-    cout << "\n";
 }
 
 void printW2CTable() {
-    string prev = "";
+    std::string prev = "";
     bool first = true;
-    for(auto codeIt=codeSet.begin(); codeIt!=codeSet.end(); ++codeIt) {
-        string code = *codeIt;
-        for(auto wordIt=code2wordMap.lower_bound(code); wordIt!=code2wordMap.upper_bound(code); ++wordIt) {
-            string word = wordIt->second;
-            cout << word << "\t" << code << "\n";
+    for (auto codeIt = codeSet.begin(); codeIt != codeSet.end(); ++codeIt) {
+        std::string code = *codeIt;
+        for (auto wordIt = code2wordMap.lower_bound(code); wordIt != code2wordMap.upper_bound(code); ++wordIt) {
+            std::string word = wordIt->second;
+            std::cout << word << "\t" << code << "\n";
         }
     }
 }
 
 int main(int argc, char *argv[]) {
-    string fileName(argv[1]);
+    if (argc < 2 || argc > 3) {
+        std::cerr << "Usage: " << argv[0] << " <file> [version]" << std::endl;
+        return 1;
+    }
+    std::string fileName(argv[1]);
+    std::string version = "1.0";
+    if (argc == 3) {
+        version = argv[2];
+    }
 
     rime::Table table(fileName);
-    table.Load();
+    if (table.Load() == false) {
+        std::cerr << "ERROR: Can't find INDEX section for table.bin file."<< std::endl;
+        return 1;
+    }
 
     // Remove directory if present.
     // Do this before extension removal incase directory has a period character.
@@ -95,27 +65,15 @@ int main(int argc, char *argv[]) {
         fileName.erase(period_idx);
     }
 
-    cout << "---\n"
+    std::cout << "---\n"
             "name: ";
-    cout << fileName;
-    cout <<"\nversion: \"1.0\"\n"
+    std::cout << fileName;
+    std::cout <<"\nversion: \"" << version <<"\"\n"
             "sort: original\n"
-            "columns:\n"
-            "  - text\n"
-            "  - code\n"
-            "  - weight\n"
-            "  - stem\n"
-            "encoder:\n"
-            "  rules:\n"
-            "    - length_equal: 2\n"
-            "      formula: \"AaAbBaBb\"\n"
-            "    - length_equal: 3\n"
-            "      formula: \"AaAbBaCa\"\n"
-            "    - length_in_range: [4, 10]\n"
-            "      formula: \"AaBaCaZa\"\n"
+            "use_preset_vocabulary: false\n"
             "...\n";
-    uint32_t synLen = table.metadata_->num_syllables;
-    for(int i=0; i<synLen; i++) {
+    uint32_t synLen = table.Find<rime::table::Metadata>(0)->num_syllables;
+    for (int i = 0; i < synLen; i++) {
         queryCode(table, i);
     }
     printW2CTable();
