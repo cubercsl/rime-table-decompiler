@@ -2,6 +2,8 @@
 #include <iterator>
 #include <map>
 #include <string>
+
+#include <boost/filesystem.hpp>
 #include <rime/dict/table.h>
 
 std::multimap<std::string, std::string> code2wordMap;
@@ -35,15 +37,26 @@ void printW2CTable() {
     }
 }
 
+void showUsage(std::string name) {
+    std::cerr << "Usage: " << name << " <file> [version]" << std::endl;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2 || argc > 3) {
-        std::cerr << "Usage: " << argv[0] << " <file> [version]" << std::endl;
+        showUsage(argv[0]);
         return 1;
     }
+    
     std::string fileName(argv[1]);
     std::string version = "1.0";
+    
     if (argc == 3) {
         version = argv[2];
+    }
+
+    if (!boost::filesystem::is_regular_file(fileName)) {
+        showUsage(argv[0]);
+        return 1;
     }
 
     rime::Table table(fileName);
